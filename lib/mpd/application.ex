@@ -11,9 +11,9 @@ defmodule Mpd.Application do
       # Start the Ecto repository
       Mpd.Repo,
       # Start the endpoint when the application starts
-      MpdWeb.Endpoint
-      # Starts a worker by calling: Mpd.Worker.start_link(arg)
-      # {Mpd.Worker, arg},
+      MpdWeb.Endpoint,
+      # Start the scraper
+      {Mpd.Scraper, %{}},
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
