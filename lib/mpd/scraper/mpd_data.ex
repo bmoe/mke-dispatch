@@ -1,4 +1,7 @@
-defmodule Mpd.Scraper.Scraper do
+defmodule Mpd.Scraper.MpdData do
+
+  @enforce_keys [:call_id, :time, :location, :district, :nature, :status]
+  defstruct [:call_id, :time, :location, :district, :nature, :status]
 
   def fetch do
     HTTPoison.get!("https://itmdapps.milwaukee.gov/MPDCallData/index.jsp?district=All")
@@ -8,7 +11,7 @@ defmodule Mpd.Scraper.Scraper do
   end
 
   defp parse_row({_tr, _attrs, children}) do
-    %{
+    %Mpd.Scraper.MpdData{
       call_id: Enum.at(children, 0) |> parse_cell(),
       time: Enum.at(children, 1) |> parse_time_cell(),
       location: Enum.at(children, 2) |> parse_cell(),

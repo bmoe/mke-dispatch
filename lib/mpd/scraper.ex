@@ -20,8 +20,10 @@ defmodule Mpd.Scraper do
   end
 
   def handle_info(:scrape, state) do
+    IO.puts("scraping")
     Mpd.Scraper.Scrape.go()
-    Process.send_after(self(), :scrape, 30_000)
+    IO.puts("done scraping. next scrape in 2 minutes")
+    Process.send_after(self(), :scrape, 120_000)
     {:noreply, state}
   end
 

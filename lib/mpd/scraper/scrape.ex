@@ -5,7 +5,7 @@ defmodule Mpd.Scraper.Scrape do
   import Ecto.Query
 
   def go do
-    calls |> Enum.each(&insert_scraped_call(&1))
+    calls() |> Enum.each(&insert_scraped_call(&1))
   end
 
   def insert_scraped_call(call) do
@@ -18,7 +18,7 @@ defmodule Mpd.Scraper.Scrape do
 
     # Look for most recent related call, which might be a duplicate.
     # XXX What if we have a dup is not the most recent?
-    call_id = call[:call_id]
+    call_id = call.call_id
     rcall = from(c in Call, where: c.call_id == ^call_id, order_by: [desc: c.inserted_at], limit: 1) |> Repo.one
 
     case rcall do
@@ -31,18 +31,18 @@ defmodule Mpd.Scraper.Scrape do
                end
         # MkePolice.Endpoint.broadcast("calls:all", "new", rcall)
         # MkePolice.Endpoint.broadcast("calls:#{rcall.district}", "new", rcall)
-        Repo.insert!(Call.changeset(%Call{}, call))
+        Repo.insert!(Call.changeset(%Call{}, Map.from_struct(call)))
       rcall ->
-        if(rcall.status != call[:status] || rcall.nature != call[:nature]) do
+        if(rcall.status != call.status || rcall.nature != call.nature) do
           # MkePolice.Endpoint.broadcast("calls:all", "new", rcall)
           # MkePolice.Endpoint.broadcast("calls:#{rcall.district}", "new", rcall)
           call = Map.put(call, :point, rcall.point)
-          Repo.insert!(Call.changeset(%Call{}, call))
+          Repo.insert!(Call.changeset(%Call{}, Map.from_struct(call)))
         end
     end
   end
 
   def calls do
-    Mpd.Scraper.Scraper.fetch
+    Mpd.Scraper.MpdData.fetch()
   end
 end
