@@ -3,8 +3,10 @@ defmodule Mpd.Scraper.MpdData do
   @enforce_keys [:call_id, :time, :location, :district, :nature, :status]
   defstruct [:call_id, :time, :location, :district, :nature, :status]
 
+  @mpd_url "https://itmdapps.milwaukee.gov/MPDCallData/index.jsp?district=All"
+
   def fetch do
-    HTTPoison.get!("https://itmdapps.milwaukee.gov/MPDCallData/index.jsp?district=All")
+    HTTPoison.get!(@mpd_url)
     |> Map.get(:body)
     |> Floki.find(".content table > tbody > tr")
     |> Enum.map(&parse_row/1)

@@ -20,28 +20,16 @@ defmodule Mpd.Scraper do
   end
 
   def handle_info(:scrape, state) do
-    IO.puts("scraping")
-    Mpd.Scraper.Scrape.go()
-    IO.puts("done scraping. next scrape in 2 minutes")
-    Process.send_after(self(), :scrape, 120_000)
+    IO.puts("scraping #{DateTime.utc_now()}")
+    Mpd.Scraper.MpdData.fetch() |>
+      Enum.each(&Mpd.Scraper.Db.insert_scraped_call(&1))
+    IO.puts("done scraping #{DateTime.utc_now()}. next scrape in 20 minutes")
+    Process.send_after(self(), :scrape, 1200_000)
     {:noreply, state}
   end
 
   def handle_info(_message, state) do
     {:noreply, state}
   end
-
-  # def format_status(reason, pdict_and_state) do
-  #   "whatever"
-  # end
-
-  # def terminate(reason, state) do
-  #   "whatever"
-  # end
-
-  # def code_change(old_vsn, state, extra) do
-  #   {:ok, state}
-  #   # {:error, "reason"}
-  # end
 
 end

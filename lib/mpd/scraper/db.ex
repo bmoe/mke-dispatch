@@ -1,12 +1,8 @@
-defmodule Mpd.Scraper.Scrape do
+defmodule Mpd.Scraper.Db do
   alias Mpd.Repo
   alias Mpd.Calls.Call
 
   import Ecto.Query
-
-  def go do
-    calls() |> Enum.each(&insert_scraped_call(&1))
-  end
 
   def insert_scraped_call(call) do
     # Cast :time to native time
@@ -42,7 +38,4 @@ defmodule Mpd.Scraper.Scrape do
     end
   end
 
-  def calls do
-    Mpd.Scraper.MpdData.fetch()
-  end
 end
