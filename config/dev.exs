@@ -79,6 +79,9 @@ config :mpd, Mpd.Repo,
   hostname: "localhost",
   pool_size: 10,
   types: MPD.PostgresTypes
+config :mpd, MpdData,
+  url: "https://itmdapps.milwaukee.gov/MPDCallData/index.jsp?district=All"
+
 """
 
 config :mpd, Mpd.Repo,

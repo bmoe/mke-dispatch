@@ -1,15 +1,39 @@
 defmodule Mpd.Scraper.MpdData do
 
+  require Logger
+
   @enforce_keys [:call_id, :time, :location, :district, :nature, :status]
   defstruct [:call_id, :time, :location, :district, :nature, :status]
 
-  @mpd_url "https://itmdapps.milwaukee.gov/MPDCallData/index.jsp?district=All"
+  @mpd_url Application.get_env(:mpd, MpdData)[:url]
 
   def fetch do
-    HTTPoison.get!(@mpd_url)
-    |> Map.get(:body)
-    |> Floki.find(".content table > tbody > tr")
-    |> Enum.map(&parse_row/1)
+    fetch(@mpd_url)
+  end
+
+  def fetch(url) do
+    # Status 429 too many requests.
+    # But only if they did their site right. Which they did not.
+    with result <- HTTPoison.get!(url),
+         Logger.debug("Status: #{result.status_code}"),
+         {:status_code, 200} <- {:status_code, result.status_code},
+         {:rate_limited, false} <- {:rate_limited, rate_limited(result)} do
+      result
+      |> Map.get(:body)
+      |> Floki.find(".content table > tbody > tr")
+      |> Enum.map(&parse_row/1)
+    else
+      {:status_code, status_code} ->
+        Logger.error("Bad status. HTTP status code: #{status_code}")
+        []
+      {:rate_limited, true} ->
+        Logger.error("Rate Limited.")
+        []
+    end
+  end
+
+  defp rate_limited(result) do
+    String.contains?(result.body, "You will be denied results until your number of calls is a reasonable number")
   end
 
   defp parse_row({_tr, _attrs, children}) do
@@ -22,6 +46,7 @@ defmodule Mpd.Scraper.MpdData do
       status: Enum.at(children, 5) |> parse_cell()
     }
   end
+
 
   defp parse_cell(nil), do: ""
   defp parse_cell({_el, _, children}) do

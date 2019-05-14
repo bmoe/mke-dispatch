@@ -9,6 +9,9 @@ config :mpd, MpdWeb.Endpoint,
 # Print only warnings and errors during test
 config :logger, level: :warn
 
+config :mpd, MpdData,
+  url: "http://localhost:9000/sample-page.html"
+
 # Configure your database
 config :mpd, Mpd.Repo,
   username: "postgres",
